@@ -3,9 +3,8 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { put } from "@vercel/blob";
 
-
-
-const CONFIG_FILE = 'https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json' //path.join(process.cwd(), 'data', 'config.json')
+const CONFIG_URL = 'https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com'
+const CONFIG_FILE = path.join(process.cwd(), 'data', 'config.json')
 
 const defaultConfig = {
   names: ['John Doe', 'Jane Smith', 'Bob Johnson'],

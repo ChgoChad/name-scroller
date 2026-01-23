@@ -33,7 +33,7 @@ export default function PresentationPage() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch('/api/config')
+        const response = await fetch('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json')
         const data = await response.json()
 
         if (typeof data?.timestamp === 'number') {
@@ -95,7 +95,7 @@ export default function PresentationPage() {
       cancelled = true
       clearTimers()
     }
-  }, [config?.timestamp, config?.animation.speed, config?.animation.pauseBetween, config?.names])
+  }, [config])
 
   if (!config) {
     return (
