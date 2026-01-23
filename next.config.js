@@ -11,7 +11,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 's-maxage=60',
+            value: 's-maxage=1',
           },
           {
             key: 'Access-Control-Allow-Origin',
