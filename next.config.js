@@ -4,7 +4,7 @@ const nextConfig = {
   images: {
     domains: [],
   },
-  async headers() {
+  async headers(){
     return [
       {
         source: '/:path*',

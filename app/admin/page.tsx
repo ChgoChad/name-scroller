@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Link from 'next/link'
-import { put } from '@vercel/blob'
 
 interface Config {
   names: string[]
@@ -94,17 +93,19 @@ export default function AdminPage() {
         },
       };
 
-      // const response = await fetch('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify(config)
-      
-      const { url } = await put("config.json", JSON.stringify(config, null, 2), { access: "public", allowOverwrite: true, });
-      console.log("Config saved to blob URL:", url);
+      // Save to Vercel Blob via API
+      const response = await fetch('/api/blob', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(config)
+      });
 
-      if (url) {
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log("Config saved to blob URL:", result.url);
         setSaveMessage("Settings saved successfully!");
         setTimeout(() => setSaveMessage(""), 3000);
       } else {

@@ -4,7 +4,7 @@ import path from 'path'
 import { put } from "@vercel/blob";
 
 const CONFIG_URL = 'https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com'
-const CONFIG_FILE = path.join(process.cwd(), 'data', 'config.json')
+const CONFIG_FILE = path.join(CONFIG_URL, 'config.json')
 
 const defaultConfig = {
   names: ['John Doe', 'Jane Smith', 'Bob Johnson'],
