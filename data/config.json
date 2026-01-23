@@ -14,8 +14,8 @@
     "color": "#ffffff"
   },
   "animation": {
-    "speed": 5,
-    "pauseBetween": 2
+    "speed": 10,
+    "pauseBetween": 0
   },
   "timestamp": 1769159298092
 }

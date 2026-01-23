@@ -16,8 +16,8 @@ const defaultConfig = {
     color: '#ffffff'
   },
   animation: {
-    speed: 3,
-    pauseBetween: 2
+    speed: 10,
+    pauseBetween: 0
   },
   timestamp: Date.now()
 }
