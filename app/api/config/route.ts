@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { put } from "@vercel/blob";
 
-const CONFIG_FILE = path.join(process.cwd(), 'data', 'config.json')
+
+
+const CONFIG_FILE = 'https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json' //path.join(process.cwd(), 'data', 'config.json')
 
 const defaultConfig = {
   names: ['John Doe', 'Jane Smith', 'Bob Johnson'],
@@ -33,7 +36,7 @@ async function ensureDataDir() {
 
 async function loadConfig() {
   try {
-    await ensureDataDir()
+   // await ensureDataDir()
     const data = await fs.readFile(CONFIG_FILE, 'utf-8')
     return JSON.parse(data)
   } catch {
@@ -44,8 +47,10 @@ async function loadConfig() {
 
 async function saveConfig(config: typeof defaultConfig) {
   try {
-    await ensureDataDir()
-    await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8')
+   // await ensureDataDir()
+   //await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8')
+   const { url } = await put('config.json', JSON.stringify(config, null, 2), { access: 'public', allowOverwrite: true });
+   console.log('Config saved to blob URL:', url);
   } catch (error) {
     console.error('[v0] Failed to save config:', error)
   }
