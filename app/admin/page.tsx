@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Link from 'next/link'
+import { put } from '@vercel/blob'
 
 interface Config {
   names: string[]
@@ -43,7 +44,7 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch('/api/config')
+        const response = await fetch('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json')
         const config: Config = await response.json()
         setNames(config.names.join('\n'))
         setGradientFrom(config.gradient.from)
@@ -61,57 +62,59 @@ export default function AdminPage() {
   }, [])
 
   const handleSave = async () => {
-    setIsSaving(true)
-    setSaveMessage('')
+    setIsSaving(true);
+    setSaveMessage("");
 
     try {
       const nameList = names
-        .split('\n')
-        .map(n => n.trim())
-        .filter(n => n.length > 0)
+        .split("\n")
+        .map((n) => n.trim())
+        .filter((n) => n.length > 0);
 
       if (nameList.length === 0) {
-        setSaveMessage('Please add at least one name')
-        setIsSaving(false)
-        return
+        setSaveMessage("Please add at least one name");
+        setIsSaving(false);
+        return;
       }
 
       const config: Config = {
         names: nameList,
         gradient: {
           from: gradientFrom,
-          to: gradientTo
+          to: gradientTo,
         },
         font: {
           size: fontSize[0],
           family: fontFamily,
-          color: fontColor
+          color: fontColor,
         },
         animation: {
           speed: speed[0],
-          pauseBetween: pauseBetween[0]
-        }
-      }
-
-      const response = await fetch('/api/config', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+          pauseBetween: pauseBetween[0],
         },
-        body: JSON.stringify(config)
-      })
+      };
 
-      if (response.ok) {
-        setSaveMessage('Settings saved successfully!')
-        setTimeout(() => setSaveMessage(''), 3000)
+      // const response = await fetch('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   },
+      //   body: JSON.stringify(config)
+      
+      const { url } = await put("config.json", JSON.stringify(config, null, 2), { access: "public", allowOverwrite: true, });
+      console.log("Config saved to blob URL:", url);
+
+      if (url) {
+        setSaveMessage("Settings saved successfully!");
+        setTimeout(() => setSaveMessage(""), 3000);
       } else {
-        setSaveMessage('Failed to save settings')
+        setSaveMessage("Failed to save settings");
       }
     } catch (error) {
-      console.error('[v0] Failed to save config:', error)
-      setSaveMessage('Error saving settings')
+      console.error("[v0] Failed to save config:", error);
+      setSaveMessage("Error saving settings");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 
