@@ -34,8 +34,8 @@ export default function AdminPage() {
   const [fontSize, setFontSize] = useState([120])
   const [fontFamily, setFontFamily] = useState('Arial')
   const [fontColor, setFontColor] = useState('#ffffff')
-  const [speed, setSpeed] = useState([3])
-  const [pauseBetween, setPauseBetween] = useState([2])
+  const [speed, setSpeed] = useState([10])
+  const [pauseBetween, setPauseBetween] = useState([0])
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
 
@@ -278,9 +278,9 @@ export default function AdminPage() {
               </Label>
               <Slider
                 id="speed"
-                min={1}
-                max={10}
-                step={0.5}
+                min={5}
+                max={30}
+                step={1}
                 value={speed}
                 onValueChange={setSpeed}
                 className="mt-2"
@@ -294,7 +294,7 @@ export default function AdminPage() {
               <Slider
                 id="pauseBetween"
                 min={0}
-                max={10}
+                max={5}
                 step={0.5}
                 value={pauseBetween}
                 onValueChange={setPauseBetween}
