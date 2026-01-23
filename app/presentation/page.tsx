@@ -35,7 +35,7 @@ export default function PresentationPage() {
       try {
         const response = await fetch('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json')
         const data = await response.json()
-
+        console.log('Fetched config:', data)
         if (typeof data?.timestamp === 'number') {
           if (lastTimestampRef.current === data.timestamp) {
             return
