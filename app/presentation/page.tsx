@@ -21,15 +21,23 @@ interface Config {
   timestamp: number
 }
 
+interface NameSlot {
+  id: number
+  name: string
+  isAnimating: boolean
+  startDelay: number
+  renderKey: number
+}
+
 export default function PresentationPage() {
   const [config, setConfig] = useState<Config | null>(null)
-  const [activeNames, setActiveNames] = useState<Array<{ name: string; id: number; delay: number }>>([])
-  const [animationStarted, setAnimationStarted] = useState(false)
-  const nameIdRef = useRef(0)
+  const [currentName, setCurrentName] = useState('')
+  const [nameKey, setNameKey] = useState(0)
   const lastTimestampRef = useRef<number | null>(null)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const timeoutsRef = useRef<number[]>([])
   const configRef = useRef<Config | null>(null)
+  const nameIndexRef = useRef(0)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const namesHashRef = useRef('')
 
   // Poll for config updates
   useEffect(() => {
@@ -56,11 +64,6 @@ export default function PresentationPage() {
 
         configRef.current = data
         setConfig(data)
-        
-        // Trigger animation start
-        if (!animationStarted) {
-          setAnimationStarted(true)
-        }
       } catch (error) {
         console.error('[v0] Failed to fetch config:', error)
       }
@@ -72,82 +75,52 @@ export default function PresentationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Animate names - only run once when animation is started
+  // Animate names - one at a time
   useEffect(() => {
-    if (!animationStarted) return
+    if (!config || config.names.length === 0) return
+
+    // Check if names actually changed
+    const currentNamesHash = config.names.join('|')
+    if (namesHashRef.current === currentNamesHash && intervalRef.current) {
+      // Names haven't changed, keep existing animation running
+      return
+    }
     
-    console.log('Animation effect starting')
-    
-    const startAnimationLoop = () => {
-      const currentConfig = configRef.current
-      if (!currentConfig || currentConfig.names.length === 0) {
-        console.log('No config or names, retrying in 1s')
-        setTimeout(startAnimationLoop, 1000)
-        return
-      }
+    namesHashRef.current = currentNamesHash
+    console.log('Names changed, restarting animation')
 
-      const animationDuration = currentConfig.animation.speed * 1000
-      const names = currentConfig.names
-      let currentIndex = 0
-
-      // Calculate when to start next name:
-      // Animation goes from 100vh to -100vh (200vh total travel)
-      // We want next name at bottom (100vh) when current is at top (0vh)
-      // That's when current has traveled 100vh out of 200vh = 50% of animation
-      const delayBetweenStarts = animationDuration * 0.5
-
-      const addName = () => {
-        const currentConfig = configRef.current
-        if (!currentConfig) return
-        
-        const names = currentConfig.names
-        const animationDuration = currentConfig.animation.speed * 1000
-        
-        const id = nameIdRef.current++
-        
-        console.log(`[${new Date().toLocaleTimeString()}] Adding name #${id}: ${names[currentIndex]}`)
-        setActiveNames(prev => {
-          const newList = [...prev, { name: names[currentIndex], id, delay: 0 }]
-          console.log(`Active names count: ${newList.length}`, newList.map(n => `#${n.id}:${n.name}`))
-          return newList
-        })
-
-        // Remove this name after animation completes
-        const timeout = window.setTimeout(() => {
-          console.log(`[${new Date().toLocaleTimeString()}] Removing name #${id}`)
-          setActiveNames(prev => prev.filter(n => n.id !== id))
-        }, animationDuration + 500)
-        
-        timeoutsRef.current.push(timeout)
-        currentIndex = (currentIndex + 1) % names.length
-      }
-
-      console.log(`Starting animation loop. Duration: ${animationDuration}ms, Delay between: ${delayBetweenStarts}ms`)
+    const showNextName = () => {
+      const names = configRef.current?.names || []
+      const duration = (configRef.current?.animation.speed || 10) * 1000
       
-      // Add first name immediately
-      addName()
+      if (names.length === 0) return
 
-      // Schedule subsequent names
-      console.log(`Setting interval to add names every ${delayBetweenStarts}ms`)
+      const nextIndex = nameIndexRef.current % names.length
+      console.log(`Showing name #${nextIndex}: ${names[nextIndex]} (duration: ${duration}ms)`)
+      
+      setCurrentName(names[nextIndex])
+      setNameKey(prev => prev + 1)
+      
+      nameIndexRef.current++
+      
+      // Schedule next name based on current config
+      if (intervalRef.current) clearInterval(intervalRef.current)
       intervalRef.current = setInterval(() => {
-        console.log('Interval fired!')
-        addName()
-      }, delayBetweenStarts)
+        showNextName()
+      }, duration)
     }
 
-    startAnimationLoop()
+    // Reset index and show first name immediately
+    nameIndexRef.current = 0
+    showNextName()
 
-    // Cleanup function - only runs when component unmounts
     return () => {
-      console.log('Component unmounting - clearing all timers')
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-      timeoutsRef.current.forEach(t => window.clearTimeout(t))
-      timeoutsRef.current = []
     }
-  }, [animationStarted])
+  }, [config])
 
   if (!config) {
     return (
@@ -175,39 +148,16 @@ export default function PresentationPage() {
       style={gradientStyle}
     >
       <div className="presentation-stage">
-        {activeNames.map(({ name, id }) => (
-          <NameScroller 
-            key={id} 
-            name={name} 
-            nameStyle={nameStyle}
-          />
-        ))}
+        {currentName && (
+          <div
+            key={nameKey}
+            className="presentation-name font-bold is-animating"
+            style={nameStyle}
+          >
+            {currentName}
+          </div>
+        )}
       </div>
-    </div>
-  )
-}
-
-// Separate component to ensure animation triggers for each name
-function NameScroller({ name, nameStyle }: { name: string; nameStyle: CSSProperties }) {
-  const [shouldAnimate, setShouldAnimate] = useState(false)
-  const elementRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    // Delay animation start to ensure element is in DOM
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setShouldAnimate(true)
-      })
-    })
-  }, [])
-
-  return (
-    <div
-      ref={elementRef}
-      className={`presentation-name font-bold ${shouldAnimate ? 'is-animating' : ''}`}
-      style={nameStyle}
-    >
-      {name}
     </div>
   )
 }
