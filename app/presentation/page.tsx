@@ -23,9 +23,8 @@ interface Config {
 
 export default function PresentationPage() {
   const [config, setConfig] = useState<Config | null>(null)
-  const [currentName, setCurrentName] = useState('')
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [nameIndex, setNameIndex] = useState(0)
+  const [activeNames, setActiveNames] = useState<Array<{ name: string; id: number }>>([])
+  const nameIdRef = useRef(0)
   const lastTimestampRef = useRef<number | null>(null)
   const timeoutsRef = useRef<number[]>([])
 
@@ -59,7 +58,6 @@ export default function PresentationPage() {
     if (!config || config.names.length === 0) return
 
     const animationDuration = config.animation.speed * 1000
-    const pauseDuration = config.animation.pauseBetween * 1000
     const names = config.names
     let currentIndex = 0
     let cancelled = false
@@ -72,28 +70,32 @@ export default function PresentationPage() {
     const showNextName = () => {
       if (cancelled) return
 
-      setCurrentName(names[currentIndex])
-      setNameIndex(prev => prev + 1)
-      setIsAnimating(true)
+      const id = nameIdRef.current++
+      setActiveNames(prev => [...prev, { name: names[currentIndex], id }])
 
-      const animationTimeout = window.setTimeout(() => {
+      // Remove the name after animation completes
+      const removeTimeout = window.setTimeout(() => {
         if (cancelled) return
-        setIsAnimating(false)
-        currentIndex = (currentIndex + 1) % names.length
-
-        const pauseTimeout = window.setTimeout(showNextName, pauseDuration)
-        timeoutsRef.current.push(pauseTimeout)
+        setActiveNames(prev => prev.filter(n => n.id !== id))
       }, animationDuration)
+      timeoutsRef.current.push(removeTimeout)
 
-      timeoutsRef.current.push(animationTimeout)
+      currentIndex = (currentIndex + 1) % names.length
+
+      // Start next name immediately (or with minimal delay)
+      // This creates continuous scrolling effect
+      const nextTimeout = window.setTimeout(showNextName, 100)
+      timeoutsRef.current.push(nextTimeout)
     }
 
     clearTimers()
+    setActiveNames([])
     showNextName()
 
     return () => {
       cancelled = true
       clearTimers()
+      setActiveNames([])
     }
   }, [config])
 
@@ -122,13 +124,15 @@ export default function PresentationPage() {
       style={gradientStyle}
     >
       <div className="presentation-stage">
-        <div
-          key={`${currentName}-${nameIndex}`}
-          className={`presentation-name font-bold ${isAnimating ? 'is-animating' : ''}`}
-          style={nameStyle}
-        >
-          {currentName}
-        </div>
+        {activeNames.map(({ name, id }) => (
+          <div
+            key={id}
+            className="presentation-name font-bold is-animating"
+            style={nameStyle}
+          >
+            {name}
+          </div>
+        ))}
       </div>
     </div>
   )
