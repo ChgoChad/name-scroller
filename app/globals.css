@@ -81,7 +81,33 @@
   left: 0;
   right: 0;
   text-align: center;
-  white-space: nowrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  padding: 0 1rem;
+  transform: translateY(100vh);
+  opacity: 0;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+/* Responsive font sizing for smaller screens */
+@media (max-width: 768px) {
+  .presentation-name {
+    padding: 0 0.5rem;
+    font-size: clamp(2rem, 8vw, var(--font-size, 120px)) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .presentation-name {
+    padding: 0 0.25rem;
+    font-size: clamp(1.5rem, 10vw, var(--font-size, 120px)) !important;
+  }
+}
+
+.presentation-name.is-animating {
   animation: presentation-scroll-up var(--scroll-duration, 10s) linear forwards;
 }
 
