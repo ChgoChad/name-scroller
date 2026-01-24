@@ -33,7 +33,15 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 's-maxage=1',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
           },
           {
             key: 'Access-Control-Allow-Origin',

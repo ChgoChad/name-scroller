@@ -43,7 +43,13 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json')
+        const response = await fetch('/api/get-config', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        })
         const config: Config = await response.json()
         setNames(config.names.join('\n'))
         setGradientFrom(config.gradient.from)

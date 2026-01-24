@@ -23,16 +23,23 @@ interface Config {
 
 export default function PresentationPage() {
   const [config, setConfig] = useState<Config | null>(null)
-  const [activeNames, setActiveNames] = useState<Array<{ name: string; id: number }>>([])
+  const [activeNames, setActiveNames] = useState<Array<{ name: string; id: number; startTime: number }>>([])
   const nameIdRef = useRef(0)
   const lastTimestampRef = useRef<number | null>(null)
-  const timeoutsRef = useRef<number[]>([])
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Poll for config updates
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json')
+        // Fetch through API proxy to avoid CORS issues
+        const response = await fetch('/api/get-config', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        })
         const data = await response.json()
         console.log('Fetched config:', data)
         if (typeof data?.timestamp === 'number') {
@@ -60,44 +67,42 @@ export default function PresentationPage() {
     const animationDuration = config.animation.speed * 1000
     const names = config.names
     let currentIndex = 0
-    let cancelled = false
 
-    const clearTimers = () => {
-      timeoutsRef.current.forEach(timeoutId => window.clearTimeout(timeoutId))
-      timeoutsRef.current = []
-    }
+    // Calculate delay: start next name when current name reaches top of screen
+    // Animation goes from 110vh to -120vh (total 230vh travel)
+    // We want next name at bottom (110vh) when current reaches top (0vh)
+    // That's when current has traveled 110vh out of 230vh = ~48% of animation
+    const delayBetweenStarts = animationDuration * 0.48
 
-    const showNextName = () => {
-      if (cancelled) return
-
+    const addName = () => {
       const id = nameIdRef.current++
-      setActiveNames(prev => [...prev, { name: names[currentIndex], id }])
+      const startTime = Date.now()
+      
+      setActiveNames(prev => [...prev, { name: names[currentIndex], id, startTime }])
 
-      // Remove the name after animation completes
-      const removeTimeout = window.setTimeout(() => {
-        if (cancelled) return
+      // Schedule removal of this name after animation completes
+      setTimeout(() => {
         setActiveNames(prev => prev.filter(n => n.id !== id))
-      }, animationDuration)
-      timeoutsRef.current.push(removeTimeout)
+      }, animationDuration + 100)
 
       currentIndex = (currentIndex + 1) % names.length
-
-      // Calculate delay: start next name when current name reaches top of screen
-      // Animation goes from 110vh to -120vh (total 230vh travel)
-      // We want next name at bottom (110vh) when current reaches top (0vh)
-      // That's when current has traveled 110vh out of 230vh = ~48% of animation
-      const delayUntilNext = animationDuration * 0.48
-      const nextTimeout = window.setTimeout(showNextName, delayUntilNext)
-      timeoutsRef.current.push(nextTimeout)
     }
 
-    clearTimers()
+    // Clear any existing names and start fresh
     setActiveNames([])
-    showNextName()
+    nameIdRef.current = 0
+    
+    // Add first name immediately
+    addName()
+
+    // Schedule subsequent names
+    intervalRef.current = setInterval(addName, delayBetweenStarts)
 
     return () => {
-      cancelled = true
-      clearTimers()
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
       setActiveNames([])
     }
   }, [config])
