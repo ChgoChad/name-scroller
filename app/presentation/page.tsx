@@ -23,10 +23,11 @@ interface Config {
 
 export default function PresentationPage() {
   const [config, setConfig] = useState<Config | null>(null)
-  const [activeNames, setActiveNames] = useState<Array<{ name: string; id: number; startTime: number }>>([])
+  const [activeNames, setActiveNames] = useState<Array<{ name: string; id: number; delay: number }>>  ([])
   const nameIdRef = useRef(0)
   const lastTimestampRef = useRef<number | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutsRef = useRef<number[]>([])
 
   // Poll for config updates
   useEffect(() => {
@@ -68,29 +69,39 @@ export default function PresentationPage() {
     const names = config.names
     let currentIndex = 0
 
-    // Calculate delay: start next name when current name reaches top of screen
-    // Animation goes from 110vh to -120vh (total 230vh travel)
-    // We want next name at bottom (110vh) when current reaches top (0vh)
-    // That's when current has traveled 110vh out of 230vh = ~48% of animation
-    const delayBetweenStarts = animationDuration * 0.48
+    // Calculate when to start next name:
+    // Animation goes from 100vh to -100vh (200vh total travel)
+    // We want next name at bottom (100vh) when current is at top (0vh)
+    // That's when current has traveled 100vh out of 200vh = 50% of animation
+    const delayBetweenStarts = animationDuration * 0.5
 
     const addName = () => {
       const id = nameIdRef.current++
-      const startTime = Date.now()
       
-      setActiveNames(prev => [...prev, { name: names[currentIndex], id, startTime }])
+      setActiveNames(prev => [...prev, { name: names[currentIndex], id, delay: 0 }])
 
-      // Schedule removal of this name after animation completes
-      setTimeout(() => {
+      // Remove this name after animation completes
+      const timeout = window.setTimeout(() => {
         setActiveNames(prev => prev.filter(n => n.id !== id))
-      }, animationDuration + 100)
-
+      }, animationDuration + 500)
+      
+      timeoutsRef.current.push(timeout)
       currentIndex = (currentIndex + 1) % names.length
     }
 
-    // Clear any existing names and start fresh
-    setActiveNames([])
-    nameIdRef.current = 0
+    // Clean up function
+    const cleanup = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      timeoutsRef.current.forEach(t => window.clearTimeout(t))
+      timeoutsRef.current = []
+      setActiveNames([])
+      nameIdRef.current = 0
+    }
+
+    cleanup()
     
     // Add first name immediately
     addName()
@@ -98,13 +109,7 @@ export default function PresentationPage() {
     // Schedule subsequent names
     intervalRef.current = setInterval(addName, delayBetweenStarts)
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
-      setActiveNames([])
-    }
+    return cleanup
   }, [config])
 
   if (!config) {
@@ -135,7 +140,7 @@ export default function PresentationPage() {
         {activeNames.map(({ name, id }) => (
           <div
             key={id}
-            className="presentation-name font-bold is-animating"
+            className="presentation-name font-bold"
             style={nameStyle}
           >
             {name}
