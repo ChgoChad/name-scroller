@@ -2,7 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: [],
+    remotePatterns: [
+      new URL('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/**'),
+    ],
+  },
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['*', '*.vercel.app', 'localhost:3000'],
+    },
   },
   async headers(){
     // Content Security Policy configuration
@@ -55,10 +62,6 @@ const nextConfig = {
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Permissions-Policy',

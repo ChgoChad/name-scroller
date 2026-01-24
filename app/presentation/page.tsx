@@ -82,9 +82,12 @@ export default function PresentationPage() {
 
       currentIndex = (currentIndex + 1) % names.length
 
-      // Start next name immediately (or with minimal delay)
-      // This creates continuous scrolling effect
-      const nextTimeout = window.setTimeout(showNextName, 100)
+      // Calculate delay: start next name when current name reaches top of screen
+      // Animation goes from 110vh to -120vh (total 230vh travel)
+      // We want next name at bottom (110vh) when current reaches top (0vh)
+      // That's when current has traveled 110vh out of 230vh = ~48% of animation
+      const delayUntilNext = animationDuration * 0.48
+      const nextTimeout = window.setTimeout(showNextName, delayUntilNext)
       timeoutsRef.current.push(nextTimeout)
     }
 
