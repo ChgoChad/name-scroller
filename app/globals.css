@@ -74,6 +74,8 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .presentation-name {
@@ -86,10 +88,14 @@
   -webkit-hyphens: auto;
   hyphens: auto;
   padding: 0 1rem;
-  transform: translateY(100vh);
+  transform: translate3d(0, 100vh, 0);
   opacity: 0;
   max-width: 100%;
   line-height: 1.2;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Responsive font sizing for smaller screens */
@@ -113,7 +119,7 @@
 
 @keyframes presentation-scroll-up {
   0% {
-    transform: translateY(100vh);
+    transform: translate3d(0, 100vh, 0);
     opacity: 0;
   }
   5% {
@@ -123,7 +129,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(-100vh);
+    transform: translate3d(0, -100vh, 0);
     opacity: 0;
   }
 }
