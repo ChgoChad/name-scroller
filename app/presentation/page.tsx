@@ -91,28 +91,28 @@ export default function PresentationPage() {
 
     const showNextName = () => {
       const names = configRef.current?.names || []
-      const duration = (configRef.current?.animation.speed || 10) * 1000
       
       if (names.length === 0) return
 
       const nextIndex = nameIndexRef.current % names.length
+      const duration = (configRef.current?.animation.speed || 10) * 1000
       console.log(`Showing name #${nextIndex}: ${names[nextIndex]} (duration: ${duration}ms)`)
       
       setCurrentName(names[nextIndex])
       setNameKey(prev => prev + 1)
       
       nameIndexRef.current++
-      
-      // Schedule next name based on current config
-      if (intervalRef.current) clearInterval(intervalRef.current)
-      intervalRef.current = setInterval(() => {
-        showNextName()
-      }, duration)
     }
 
     // Reset index and show first name immediately
     nameIndexRef.current = 0
     showNextName()
+
+    // Set up interval to show subsequent names
+    const duration = (config.animation.speed || 10) * 1000
+    intervalRef.current = setInterval(() => {
+      showNextName()
+    }, duration)
 
     return () => {
       if (intervalRef.current) {
