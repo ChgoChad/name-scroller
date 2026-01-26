@@ -37,7 +37,8 @@ export default function PresentationPage() {
   const configRef = useRef<Config | null>(null)
   const nameIndexRef = useRef(0)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const namesHashRef = useRef('')
+  const animationHashRef = useRef('')
+  const namesListHashRef = useRef('')
 
   // Poll for config updates
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function PresentationPage() {
     }
 
     fetchConfig()
-    const interval = setInterval(fetchConfig, 1000)
+    const interval = setInterval(fetchConfig, 5000)
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -79,44 +80,60 @@ export default function PresentationPage() {
   useEffect(() => {
     if (!config || config.names.length === 0) return
 
-    // Check if names actually changed
     const currentNamesHash = config.names.join('|')
-    if (namesHashRef.current === currentNamesHash && intervalRef.current) {
-      // Names haven't changed, keep existing animation running
-      return
-    }
+    const namesChanged = namesListHashRef.current !== currentNamesHash
     
-    namesHashRef.current = currentNamesHash
-    console.log('Names changed, restarting animation')
+    namesListHashRef.current = currentNamesHash
+
+    console.log('Config changed:', {
+      namesChanged,
+      nameCount: config.names.length,
+      speed: config.animation.speed,
+      pauseBetween: config.animation.pauseBetween,
+      currentIndex: nameIndexRef.current
+    })
+
+    // Clear any existing timeout
+    if (intervalRef.current) {
+      clearTimeout(intervalRef.current)
+      intervalRef.current = null
+    }
+
+    // Only reset to beginning if names list changed
+    if (namesChanged) {
+      console.log('Names changed, resetting to first name')
+      nameIndexRef.current = 0
+    } else {
+      console.log('Only timing changed, continuing from current position')
+    }
 
     const showNextName = () => {
       const names = configRef.current?.names || []
-      
       if (names.length === 0) return
 
-      const nextIndex = nameIndexRef.current % names.length
-      const duration = (configRef.current?.animation.speed || 10) * 1000
-      console.log(`Showing name #${nextIndex}: ${names[nextIndex]} (duration: ${duration}ms)`)
+      const currentIndex = nameIndexRef.current % names.length
+      const animSpeed = configRef.current?.animation.speed || 10
+      const pauseTime = configRef.current?.animation.pauseBetween || 0
+      const totalDelay = (animSpeed + pauseTime) * 1000
       
-      setCurrentName(names[nextIndex])
+      console.log(`[${new Date().toLocaleTimeString()}] Showing name #${currentIndex}: "${names[currentIndex]}" (will show next in ${totalDelay}ms)`)
+      
+      setCurrentName(names[currentIndex])
       setNameKey(prev => prev + 1)
       
-      nameIndexRef.current++
+      // Move to next name
+      nameIndexRef.current = (nameIndexRef.current + 1) % names.length
+      
+      // Schedule next name
+      intervalRef.current = setTimeout(showNextName, totalDelay)
     }
 
-    // Reset index and show first name immediately
-    nameIndexRef.current = 0
+    // Start immediately
     showNextName()
-
-    // Set up interval to show subsequent names
-    const duration = (config.animation.speed || 10) * 1000
-    intervalRef.current = setInterval(() => {
-      showNextName()
-    }, duration)
 
     return () => {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current)
+        clearTimeout(intervalRef.current)
         intervalRef.current = null
       }
     }
