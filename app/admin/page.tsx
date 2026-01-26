@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Link from 'next/link'
 
 interface Config {
+  title: string
   names: string[]
   gradient: {
     from: string
@@ -28,6 +29,7 @@ interface Config {
 }
 
 export default function AdminPage() {
+  const [title, setTitle] = useState('')
   const [names, setNames] = useState('')
   const [gradientFrom, setGradientFrom] = useState('#1e293b')
   const [gradientTo, setGradientTo] = useState('#334155')
@@ -51,6 +53,7 @@ export default function AdminPage() {
           }
         })
         const config: Config = await response.json()
+        setTitle(config.title || '')
         setNames(config.names.join('\n'))
         setGradientFrom(config.gradient.from)
         setGradientTo(config.gradient.to)
@@ -83,6 +86,7 @@ export default function AdminPage() {
       }
 
       const config: Config = {
+        title: title,
         names: nameList,
         gradient: {
           from: gradientFrom,
@@ -137,6 +141,22 @@ export default function AdminPage() {
             <Button variant="outline">Open Presentation</Button>
           </Link>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Title</CardTitle>
+            <CardDescription>
+              Optional title to display at the top of the screen
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Input
+              placeholder="Enter title text (leave blank for no title)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

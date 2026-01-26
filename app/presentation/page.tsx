@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 interface Config {
+  title: string
   names: string[]
   gradient: {
     from: string
@@ -99,14 +100,6 @@ export default function PresentationPage() {
       intervalRef.current = null
     }
 
-    // Only reset to beginning if names list changed
-    if (namesChanged) {
-      console.log('Names changed, resetting to first name')
-      nameIndexRef.current = 0
-    } else {
-      console.log('Only timing changed, continuing from current position')
-    }
-
     const showNextName = () => {
       const names = configRef.current?.names || []
       if (names.length === 0) return
@@ -128,7 +121,7 @@ export default function PresentationPage() {
       intervalRef.current = setTimeout(showNextName, totalDelay)
     }
 
-    // Start immediately
+    // Start immediately from current position
     showNextName()
 
     return () => {
@@ -164,6 +157,19 @@ export default function PresentationPage() {
       className="min-h-screen overflow-hidden relative"
       style={gradientStyle}
     >
+      {config.title && (
+        <div 
+          className="absolute top-8 left-0 right-0 text-center font-bold px-4"
+          style={{
+            fontSize: `${config.font.size * 0.8}px`,
+            fontFamily: config.font.family,
+            color: config.font.color,
+            zIndex: 10
+          }}
+        >
+          {config.title}
+        </div>
+      )}
       <div className="presentation-stage">
         {currentName && (
           <div
