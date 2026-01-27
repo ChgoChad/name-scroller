@@ -5,11 +5,18 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     
+    // Add timestamp to trigger updates on presentation page
+    const configWithTimestamp = {
+      ...body,
+      timestamp: Date.now()
+    }
+    
     // Save to Vercel Blob
-    const { url } = await put('config.json', JSON.stringify(body, null, 2), { 
+    const { url } = await put('config.json', JSON.stringify(configWithTimestamp, null, 2), { 
       access: 'public',
       addRandomSuffix: false,
-      allowOverwrite: true
+      allowOverwrite: true,
+      cacheControlMaxAge: 0
     })
     
     console.log('Config saved to Vercel Blob:', url)

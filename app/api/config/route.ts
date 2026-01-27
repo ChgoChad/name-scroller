@@ -7,19 +7,30 @@ const CONFIG_URL = 'https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com'
 const CONFIG_FILE = path.join(CONFIG_URL, 'config.json')
 
 const defaultConfig = {
-  names: ['John Doe', 'Jane Smith', 'Bob Johnson'],
-  gradient: {
-    from: '#1e293b',
-    to: '#334155'
+  "title": "SILENT AUCTION WINNERS",
+  "names": [
+    "John Doe",
+    "Jane Smith",
+    "Bob Johnson",
+    "1231564",
+    "Yo what's up this is a really, really, really, long line!!"
+  ],
+  "gradient": {
+    "from": "#1e293b",
+    "to": "#1665d4"
   },
-  font: {
-    size: 120,
-    family: 'Arial',
-    color: '#ffffff'
+  "font": {
+    "size": 120,
+    "family": "Arial",
+    "color": "#ffffff"
   },
-  animation: {
-    speed: 10,
-    pauseBetween: 0
+  "animation": {
+    "speed": 20,
+    "pauseBetween": 1.5
+  },
+  "logo": {
+    "useAlternate": false,
+    "opacity": 25
   },
   timestamp: Date.now()
 }
@@ -48,7 +59,7 @@ async function saveConfig(config: typeof defaultConfig) {
   try {
    // await ensureDataDir()
    //await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8')
-   const { url } = await put('config.json', JSON.stringify(config, null, 2), { access: 'public', allowOverwrite: true });
+   const { url } = await put('config.json', JSON.stringify(config, null, 2), { access: 'public', allowOverwrite: true, cacheControlMaxAge: 0 });
    console.log('Config saved to blob URL:', url);
   } catch (error) {
     console.error('[v0] Failed to save config:', error)
@@ -75,6 +86,9 @@ export async function POST(request: Request) {
     const config = await loadConfig()
     
     // Update config with new values
+    if (body.title !== undefined) {
+      config.title = body.title
+    }
     if (body.names !== undefined) {
       config.names = body.names
     }
@@ -86,6 +100,12 @@ export async function POST(request: Request) {
     }
     if (body.animation !== undefined) {
       config.animation = body.animation
+    }
+    if (body.logo !== undefined) {
+      config.logo = body.logo
+    }
+    if (body.updateInterval !== undefined) {
+      config.updateInterval = body.updateInterval
     }
     
     // Update timestamp to trigger client updates
