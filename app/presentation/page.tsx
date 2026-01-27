@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
+import Image from 'next/image'
 
 interface Config {
   title: string
@@ -18,6 +19,10 @@ interface Config {
   animation: {
     speed: number
     pauseBetween: number
+  }
+  logo?: {
+    useAlternate: boolean
+    opacity: number
   }
   timestamp: number
 }
@@ -157,6 +162,29 @@ export default function PresentationPage() {
       className="min-h-screen overflow-hidden relative"
       style={gradientStyle}
     >
+      {/* Fire Department Logo Background */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{ zIndex: 0 }}
+      >
+        <div 
+          className="relative"
+          style={{
+            width: '60vw',
+            height: '60vh',
+            opacity: (config.logo?.opacity ?? 40) / 100
+          }}
+        >
+          <Image 
+            src={config.logo?.useAlternate ? "/ProjectFireBuddies_Logo_NoWhite.png" : "/ProjectFireBuddies_Logo.png"}
+            alt="Fire Department Logo"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
+      </div>
+
       {config.title && (
         <div 
           className="absolute top-8 left-0 right-0 text-center font-bold px-4"

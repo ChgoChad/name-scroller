@@ -1,73 +1,81 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Slider } from '@/components/ui/slider'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import Link from 'next/link'
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
 
 interface Config {
-  title: string
-  names: string[]
+  title: string;
+  names: string[];
   gradient: {
-    from: string
-    to: string
-  }
+    from: string;
+    to: string;
+  };
   font: {
-    size: number
-    family: string
-    color: string
-  }
+    size: number;
+    family: string;
+    color: string;
+  };
   animation: {
-    speed: number
-    pauseBetween: number
-  }
+    speed: number;
+    pauseBetween: number;
+  };
+  logo: {
+    useAlternate: boolean;
+    opacity: number;
+  };
 }
 
 export default function AdminPage() {
-  const [title, setTitle] = useState('')
-  const [names, setNames] = useState('')
-  const [gradientFrom, setGradientFrom] = useState('#1e293b')
-  const [gradientTo, setGradientTo] = useState('#334155')
-  const [fontSize, setFontSize] = useState([120])
-  const [fontFamily, setFontFamily] = useState('Arial')
-  const [fontColor, setFontColor] = useState('#ffffff')
-  const [speed, setSpeed] = useState([10])
-  const [pauseBetween, setPauseBetween] = useState([0])
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveMessage, setSaveMessage] = useState('')
+  const [title, setTitle] = useState("");
+  const [names, setNames] = useState("");
+  const [gradientFrom, setGradientFrom] = useState("#1e293b");
+  const [gradientTo, setGradientTo] = useState("#334155");
+  const [fontSize, setFontSize] = useState([120]);
+  const [fontFamily, setFontFamily] = useState("Arial");
+  const [fontColor, setFontColor] = useState("#ffffff");
+  const [speed, setSpeed] = useState([10]);
+  const [pauseBetween, setPauseBetween] = useState([0]);
+  const [useAlternateLogo, setUseAlternateLogo] = useState(false);
+  const [logoOpacity, setLogoOpacity] = useState([40]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   // Load initial config
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch('/api/get-config', {
-          cache: 'no-store',
+        const response = await fetch("/api/get-config", {
+          cache: "no-store",
           headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        })
-        const config: Config = await response.json()
-        setTitle(config.title || '')
-        setNames(config.names.join('\n'))
-        setGradientFrom(config.gradient.from)
-        setGradientTo(config.gradient.to)
-        setFontSize([config.font.size])
-        setFontFamily(config.font.family)
-        setFontColor(config.font.color)
-        setSpeed([config.animation.speed])
-        setPauseBetween([config.animation.pauseBetween])
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        });
+        const config: Config = await response.json();
+        setTitle(config.title || "");
+        setNames(config.names.join("\n"));
+        setGradientFrom(config.gradient.from);
+        setGradientTo(config.gradient.to);
+        setFontSize([config.font.size]);
+        setFontFamily(config.font.family);
+        setFontColor(config.font.color);
+        setSpeed([config.animation.speed]);
+        setPauseBetween([config.animation.pauseBetween]);
+        setUseAlternateLogo(config.logo?.useAlternate || false);
+        setLogoOpacity([config.logo?.opacity || 40]);
       } catch (error) {
-        console.error('[v0] Failed to load config:', error)
+        console.error("[v0] Failed to load config:", error);
       }
-    }
-    fetchConfig()
-  }, [])
+    };
+    fetchConfig();
+  }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -101,15 +109,19 @@ export default function AdminPage() {
           speed: speed[0],
           pauseBetween: pauseBetween[0],
         },
+        logo: {
+          useAlternate: useAlternateLogo,
+          opacity: logoOpacity[0],
+        },
       };
 
       // Save to Vercel Blob via API
-      const response = await fetch('/api/blob', {
-        method: 'POST',
+      const response = await fetch("/api/blob", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       const result = await response.json();
@@ -127,7 +139,7 @@ export default function AdminPage() {
     } finally {
       setIsSaving(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-secondary/30 p-4 md:p-8">
@@ -145,9 +157,7 @@ export default function AdminPage() {
         <Card>
           <CardHeader>
             <CardTitle>Title</CardTitle>
-            <CardDescription>
-              Optional title to display at the top of the screen
-            </CardDescription>
+            <CardDescription>Optional title to display at the top of the screen</CardDescription>
           </CardHeader>
           <CardContent>
             <Input
@@ -161,9 +171,20 @@ export default function AdminPage() {
         <Card>
           <CardHeader>
             <CardTitle>Names</CardTitle>
-            <CardDescription>
-              Enter names to display, one per line
-            </CardDescription>
+            <CardDescription>Enter names to display, one per line</CardDescription>
+            <div className="flex items-center justify-end gap-4">
+              {saveMessage && (
+                <span
+                  className={
+                    saveMessage.includes("success") ? "text-green-600 dark:text-green-400" : "text-destructive"
+                  }>
+                  {saveMessage}
+                </span>
+              )}
+              <Button onClick={handleSave} disabled={isSaving} size="lg" className="w-full md:w-auto">
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Textarea
@@ -179,9 +200,7 @@ export default function AdminPage() {
         <Card>
           <CardHeader>
             <CardTitle>Background Gradient</CardTitle>
-            <CardDescription>
-              Choose the gradient colors for the presentation background
-            </CardDescription>
+            <CardDescription>Choose the gradient colors for the presentation background</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -225,7 +244,7 @@ export default function AdminPage() {
             <div
               className="h-20 rounded-md"
               style={{
-                background: `linear-gradient(to bottom right, ${gradientFrom}, ${gradientTo})`
+                background: `linear-gradient(to bottom right, ${gradientFrom}, ${gradientTo})`,
               }}
             />
           </CardContent>
@@ -234,15 +253,11 @@ export default function AdminPage() {
         <Card>
           <CardHeader>
             <CardTitle>Font Settings</CardTitle>
-            <CardDescription>
-              Customize the appearance of the names
-            </CardDescription>
+            <CardDescription>Customize the appearance of the names</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <Label htmlFor="fontSize">
-                Font Size: {fontSize[0]}px
-              </Label>
+              <Label htmlFor="fontSize">Font Size: {fontSize[0]}px</Label>
               <Slider
                 id="fontSize"
                 min={40}
@@ -296,31 +311,52 @@ export default function AdminPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Animation Settings</CardTitle>
-            <CardDescription>
-              Control the timing and speed of the scrolling animation
-            </CardDescription>
+            <CardTitle>Logo Settings</CardTitle>
+            <CardDescription>Configure the background logo appearance</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="speed">
-                Scroll Speed: {speed[0]} seconds
-              </Label>
-              <Slider
-                id="speed"
-                min={5}
-                max={30}
-                step={1}
-                value={speed}
-                onValueChange={setSpeed}
-                className="mt-2"
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="useAlternateLogo"
+                checked={useAlternateLogo}
+                onChange={(e) => setUseAlternateLogo(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+                aria-label="Use Alternate Logo"
               />
+              <Label htmlFor="useAlternateLogo" className="cursor-pointer">
+                Use Alternate Logo (No White Background)
+              </Label>
             </div>
 
             <div>
-              <Label htmlFor="pauseBetween">
-                Pause Between Names: {pauseBetween[0]} seconds
-              </Label>
+              <Label htmlFor="logoOpacity">Logo Opacity: {logoOpacity[0]}%</Label>
+              <Slider
+                id="logoOpacity"
+                min={0}
+                max={100}
+                step={5}
+                value={logoOpacity}
+                onValueChange={setLogoOpacity}
+                className="mt-2"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Animation Settings</CardTitle>
+            <CardDescription>Control the timing and speed of the scrolling animation</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <Label htmlFor="speed">Scroll Speed: {speed[0]} seconds</Label>
+              <Slider id="speed" min={5} max={30} step={1} value={speed} onValueChange={setSpeed} className="mt-2" />
+            </div>
+
+            <div>
+              <Label htmlFor="pauseBetween">Pause Between Names: {pauseBetween[0]} seconds</Label>
               <Slider
                 id="pauseBetween"
                 min={0}
@@ -335,21 +371,17 @@ export default function AdminPage() {
         </Card>
 
         <div className="flex items-center gap-4">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving}
-            size="lg"
-            className="w-full md:w-auto"
-          >
-            {isSaving ? 'Saving...' : 'Save Changes'}
+          <Button onClick={handleSave} disabled={isSaving} size="lg" className="w-full md:w-auto">
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
           {saveMessage && (
-            <span className={saveMessage.includes('success') ? 'text-green-600 dark:text-green-400' : 'text-destructive'}>
+            <span
+              className={saveMessage.includes("success") ? "text-green-600 dark:text-green-400" : "text-destructive"}>
               {saveMessage}
             </span>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

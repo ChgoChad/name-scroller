@@ -18,5 +18,9 @@
     "speed": 10,
     "pauseBetween": 0
   },
+  "logo": {
+    "useAlternate": false,
+    "opacity": 40
+  },
   "timestamp": 1769159298092
 }
