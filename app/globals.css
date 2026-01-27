@@ -127,12 +127,12 @@
     transform: translate3d(0, 0, 0);
     opacity: 1;
   }
-  90% {
+  85% {
     transform: translate3d(0, 0, 0);
     opacity: 1;
   }
   100% {
-    transform: translate3d(100vw, 0, 0);
+    transform: translate3d(0, 0, 0);
     opacity: 0;
   }
 }

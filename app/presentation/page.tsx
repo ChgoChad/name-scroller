@@ -179,6 +179,7 @@ export default function PresentationPage() {
             src={config.logo?.useAlternate ? "/ProjectFireBuddies_Logo_NoWhite.png" : "/ProjectFireBuddies_Logo.png"}
             alt="Fire Department Logo"
             fill
+            sizes="60vw"
             className="object-contain"
             priority
           />
