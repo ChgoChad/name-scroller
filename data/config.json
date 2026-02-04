@@ -1,26 +1,30 @@
 {
-  "title": "",
+  "title": "RAFFLE WINNERS",
   "names": [
     "John Doe",
     "Jane Smith",
-    "Bob Johnson"
+    "Bob Johnson",
+    "#101- Name",
+    "#102 - Name tWo",
+    "#103 - Name three",
+    "#104 - Test Four"
   ],
   "gradient": {
-    "from": "#1e293b",
-    "to": "#334155"
+    "from": "#1e2c43",
+    "to": "#2468d6"
   },
   "font": {
-    "size": 120,
+    "size": 140,
     "family": "Arial",
     "color": "#ffffff"
   },
   "animation": {
-    "speed": 10,
+    "speed": 4,
     "pauseBetween": 0
   },
   "logo": {
     "useAlternate": false,
-    "opacity": 40
+    "opacity": 25
   },
-  "timestamp": 1769159298092
+  "timestamp": 1770158514749
 }

@@ -1,11 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    remotePatterns: [
-      new URL('https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/**'),
-    ],
-  },
   experimental: {
     serverActions: {
       allowedOrigins: ['*', '*.vercel.app', 'localhost:3000'],
@@ -13,18 +8,19 @@ const nextConfig = {
   },
   async headers(){
     // Content Security Policy configuration
+    const isDevelopment = process.env.NODE_ENV === 'development'
     const ContentSecurityPolicy = `
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: https:;
       font-src 'self' data:;
-      connect-src 'self' https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com;
+      connect-src 'self';
       base-uri 'self';
       form-action 'self';
       frame-ancestors 'none';
       object-src 'none';
-      upgrade-insecure-requests;
+      ${isDevelopment ? '' : 'upgrade-insecure-requests;'}
     `.replace(/\s{2,}/g, ' ').trim()
 
     return [

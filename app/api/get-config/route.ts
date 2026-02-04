@@ -1,17 +1,12 @@
 import { NextResponse } from 'next/server'
+import { promises as fs } from 'fs'
+import path from 'path'
 
 export async function GET() {
   try {
-    // Fetch from blob storage server-side (no CORS issues)
-    const response = await fetch(`https://lrwfayd80qrpo4fb.public.blob.vercel-storage.com/config.json?t=${Date.now()}`, {
-      cache: 'no-store',
-    })
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch config')
-    }
-    
-    const data = await response.json()
+    // Read from local filesystem
+    const configPath = path.join(process.cwd(), 'data', 'config.json')
+    const data = JSON.parse(await fs.readFile(configPath, 'utf-8'))
     
     // Return with CORS headers
     return NextResponse.json(data, {

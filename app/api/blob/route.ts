@@ -1,5 +1,15 @@
 import { NextResponse } from 'next/server'
-import { put } from '@vercel/blob'
+import { promises as fs } from 'fs'
+import path from 'path'
+
+async function ensureDataDir() {
+  const dataDir = path.join(process.cwd(), 'data')
+  try {
+    await fs.access(dataDir)
+  } catch {
+    await fs.mkdir(dataDir, { recursive: true })
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -11,17 +21,14 @@ export async function POST(request: Request) {
       timestamp: Date.now()
     }
     
-    // Save to Vercel Blob
-    const { url } = await put('config.json', JSON.stringify(configWithTimestamp, null, 2), { 
-      access: 'public',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-      cacheControlMaxAge: 0
-    })
+    // Save to local filesystem
+    await ensureDataDir()
+    const configPath = path.join(process.cwd(), 'data', 'config.json')
+    await fs.writeFile(configPath, JSON.stringify(configWithTimestamp, null, 2), 'utf-8')
     
-    console.log('Config saved to Vercel Blob:', url)
+    console.log('Config saved to local filesystem:', configPath)
     
-    return NextResponse.json({ success: true, url }, {
+    return NextResponse.json({ success: true, path: configPath }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
@@ -32,7 +39,7 @@ export async function POST(request: Request) {
       }
     })
   } catch (error) {
-    console.error('Failed to save to Vercel Blob:', error)
+    console.error('Failed to save to local filesystem:', error)
     return NextResponse.json(
       { error: 'Failed to save configuration' },
       { 

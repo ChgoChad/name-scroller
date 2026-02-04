@@ -13,12 +13,17 @@ export default function Home() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Link href="/presentation" className="block">
+          <Link href="/presentation" className="block" target="_blank" rel="noopener noreferrer">
             <Button className="w-full" size="lg">
               Open Presentation View
             </Button>
           </Link>
-          <Link href="/admin" className="block">
+          <Link href="/names" className="block" target="_blank" rel="noopener noreferrer">
+            <Button className="w-full" size="lg" variant="outline">
+              Update Names
+            </Button>
+          </Link>
+          <Link href="/admin" className="block" target="_blank" rel="noopener noreferrer">
             <Button className="w-full bg-transparent" size="lg" variant="outline">
               Open Admin Panel
             </Button>

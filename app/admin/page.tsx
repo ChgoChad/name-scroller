@@ -115,7 +115,7 @@ export default function AdminPage() {
         },
       };
 
-      // Save to Vercel Blob via API
+      // Save config via API
       const response = await fetch("/api/blob", {
         method: "POST",
         headers: {
@@ -149,6 +149,10 @@ export default function AdminPage() {
             <h1 className="text-3xl font-bold text-foreground">Admin Panel</h1>
             <p className="text-muted-foreground">Configure the presentation display</p>
           </div>
+          <div className="text-red-500 w-[200px] text-right">Save your changes before switching pages!</div>
+          <Link href="/names">
+            <Button variant="outline">Open Names Panel</Button>
+          </Link>
           <Link href="/presentation" target="_blank">
             <Button variant="outline">Open Presentation</Button>
           </Link>
@@ -352,7 +356,7 @@ export default function AdminPage() {
           <CardContent className="space-y-6">
             <div>
               <Label htmlFor="speed">Scroll Speed: {speed[0]} seconds</Label>
-              <Slider id="speed" min={5} max={30} step={1} value={speed} onValueChange={setSpeed} className="mt-2" />
+              <Slider id="speed" min={0} max={30} step={1} value={speed} onValueChange={setSpeed} className="mt-2" />
             </div>
 
             <div>

@@ -58,6 +58,7 @@ export default function PresentationPage() {
             'Pragma': 'no-cache'
           }
         })
+
         const data = await response.json()
         
         // Only update config if timestamp actually changed
@@ -81,6 +82,7 @@ export default function PresentationPage() {
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
 
   // Animate names - one at a time
   useEffect(() => {
